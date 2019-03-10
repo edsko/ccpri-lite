@@ -405,7 +405,7 @@ function calculatorPress(button) {
   receivedElem.value = received;
 
   // Update change
-  var change     = parseFloat(received) - totals["overall"];
+  var change     = parseFloat(received) - booking["totals"]["overall"];
   var changeElem = document.getElementById("change");
 
   if(change >= 0) {
