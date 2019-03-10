@@ -527,6 +527,16 @@ function formatBooking(entry) {
  */
 function printReceipt() {
   // Make global variable available for the receipt to refer to
-  receipt = "This is the receipt";
+  receipt = {
+      "arrival"     : booking["arrival"]
+    , "departure"   : booking["departure"]
+    , "price"       : booking["totals"]["overall"]
+    , "id"          : booking["id"]
+    , "adults"      : booking["selected"]["adults"]
+    , "children"    : booking["selected"]["children"]
+    , "electricity" : booking["selected"]["electricity"] > 0 ? "yes" : "no"
+    , "per-night"   : booking["totals"]["per-night"]
+    , "nights"      : booking["selected"]["nights"]
+    };
   window.open("receipt.html");
 }
