@@ -38,17 +38,14 @@ var allScreens = ["main", "receipt", "leaving"];
 var headerButtons = {
     "main"    : ["Ok", "Leaving"]
   , "receipt" : ["Cancel", "Print"]
+  , "leaving" : ["Ok"]
   };
 
 // Debugging only: show all screens at once
-var showAllScreens = true;
+var showAllScreens = false;
 
-/*
- * Global variables
- */
-
-// Currently selected values
-var selected = {
+// Default selected (for initial screen and after taking a booking)
+var defaultSelected = {
     "type"        : "5-caravan"
   , "nationality" : "01-IE"
   , "nights"      : "000"
@@ -56,6 +53,13 @@ var selected = {
   , "children"    : "000"
   , "electricity" : "false"
   }
+
+/*
+ * Global variables
+ */
+
+// Currently selected values (set in `init`)
+var selected = null;
 
 // Selected date (set in `init`)
 var selectedDate = null;
@@ -137,7 +141,7 @@ function init() {
 
   selectedDate = new Date();
 
-  markSelectedFields();
+  resetMainScreen();
   updateDateField();
   showPrices();
   recomputeTotals();
@@ -160,12 +164,24 @@ function isStandardValue(field, value) {
 }
 
 /*
- * Mark selected elements based on the current value of `selected`
+ * Reset the main booking screen
  */
-function markSelectedFields() {
-  for (var field in selected) {
+function resetMainScreen() {
+  document.getElementById("identification").value = "";
+
+  if(selected) {
+    for (var field in selected) {
+      setFieldState(field, selected[field], "unselected");
+    }
+  }
+
+  selected = {};
+  for (var field in defaultSelected) {
+    selected[field] = defaultSelected[field];
     setFieldState(field, selected[field], "selected");
   }
+
+  recomputeTotals();
 }
 
 /*
@@ -267,6 +283,10 @@ function clickedHeaderButton(curScreen, button) {
         case "Print": confirmBooking(); break;
       }
       break;
+    case "leaving":
+      switch(button) {
+        case "Ok": selectScreen("main"); break;
+      }
   }
 }
 
@@ -320,18 +340,19 @@ function recomputeTotals() {
   }
 
   // update the global booking
+  // we format the dates here because we don't want time info
   booking = {
       "id"          : document.getElementById("identification").value
     , "type"        : selected["type"]
     , "nationality" : selected["nationality"]
     , "selected"    : converted
-    , "arrival"     : selectedDate
-    , "departure"   : advanceDate(selectedDate, converted["nights"])
+    , "arrival"     : formatDate(selectedDate)
+    , "departure"   : formatDate(advanceDate(selectedDate, converted["nights"]))
     , "totals"      : totals
     };
 
-  document.getElementById("arrival").innerHTML   = formatDate(booking["arrival"]);
-  document.getElementById("departure").innerHTML = formatDate(booking["departure"]);
+  document.getElementById("arrival").innerHTML   = booking["arrival"];
+  document.getElementById("departure").innerHTML = booking["departure"];
 }
 
 /*
@@ -400,11 +421,9 @@ function calculatorPress(button) {
  * Add it to the application state, print receipt, back to home screen
  */
 function confirmBooking() {
-  console.log("confirming", booking);
-
   var tx = db.transaction(["bookings"], "readwrite");
   tx.oncomplete = function(event) {
-    console.log("Booking written to the DB");
+    resetMainScreen();
     selectScreen('main');
   }
   tx.onerror = function(event) {
@@ -436,8 +455,9 @@ function openDB() {
   };
   request.onupgradeneeded = function(event) {
     console.log("Upgrading database");
-    var db = event.target.result;
-    db.createObjectStore("bookings", { autoIncrement: true });
+    var db       = event.target.result;
+    var objStore = db.createObjectStore("bookings", { autoIncrement: true });
+    objStore.createIndex("departure", "departure", { unique: false });
   }
 }
 
@@ -445,14 +465,58 @@ function openDB() {
  * Update and then switch to the leaving screen
  */
 function showLeaving() {
-  console.log("Showing leaving..");
-
   var elemNumLeaving        = document.getElementById("numLeaving");
   var elemLeavingDate       = document.getElementById("leavingDate");
-  var elemNumKnownReg       = document.getElementById("numKnownReg");
-  var elemNumUnknownReg     = document.getElementById("numUnknownReg");
-  var elemLeavingKnownReg   = document.getElementById("leavingKnownReg");
-  var elemLeavingUnknownReg = document.getElementById("leavingUnknownReg");
+  var elemNumRegKnown       = document.getElementById("numRegKnown");
+  var elemNumRegUnknown     = document.getElementById("numRegUnknown");
+  var elemLeavingRegKnown   = document.getElementById("leavingRegKnown");
+  var elemLeavingRegUnknown = document.getElementById("leavingRegUnknown");
 
-  elemLeavingDate.innerHTML = formatDate(selectedDate);
+  var departure = formatDate(selectedDate);
+  elemLeavingDate.innerHTML = departure;
+
+  var objStore = db.transaction("bookings").objectStore("bookings");
+  var index    = objStore.index("departure");
+
+  var numRegKnown       = 0;
+  var numRegUnknown     = 0;
+  var leavingRegKnown   = "";
+  var leavingRegUnknown = "";
+
+  index.openCursor(IDBKeyRange.only(departure)).onsuccess = function(event) {
+    var cursor = event.target.result;
+    if(cursor) {
+      var entry = cursor.value;
+      if(entry["id"] == "") {
+        numRegUnknown++;
+        leavingRegUnknown += "<li>" + formatBooking(entry) + "</li>";
+      } else {
+        numRegKnown++;
+        leavingRegKnown += "<li>" + formatBooking(entry) + "</li>";
+      }
+      cursor.continue();
+    } else {
+      // Processed all elements
+      elemNumLeaving.innerHTML        = numRegKnown + numRegUnknown;
+      elemNumRegKnown.innerHTML       = numRegKnown;
+      elemNumRegUnknown.innerHTML     = numRegUnknown;
+      elemLeavingRegKnown.innerHTML   = leavingRegKnown;
+      elemLeavingRegUnknown.innerHTML = leavingRegUnknown;
+      selectScreen('leaving');
+    }
+  }
+}
+
+/*
+ * Format a booking for an entry in the leaving list
+ */
+function formatBooking(entry) {
+  var selected = entry["selected"];
+
+  return entry["type"].substring(2) + " "
+       + selected["adults"] + "+"
+       + selected["children"]
+       + (selected["electricity"] > 0 ? "+E" : "") + " "
+       + "(" + selected["nights"] + ")"
+       ;
 }
