@@ -60,6 +60,9 @@ var selected = {
 // Selected date (set in `init`)
 var selectedDate = null;
 
+// Current totals (set in 'recomputeTotals')
+var totals = null;
+
 /*
  * Get UI elements
  */
@@ -258,8 +261,8 @@ function clickedHeaderButton(curScreen, button) {
 function convertSelected() {
   return {
       "nights"      : parseInt(selected["nights"])
-    , "adults"      : parseInt(selected["adults"])
-    , "children"    : parseInt(selected["children"])
+    , "adults"      : parseFloat(selected["adults"])
+    , "children"    : parseFloat(selected["children"])
     , "electricity" : selected["electricity"] == 'true' ? 1 : 0
     };
 }
@@ -287,8 +290,6 @@ function computeTotals(converted) {
  * Recompute totals and update the UI
  */
 function recomputeTotals() {
-  console.log("Recomputing..");
-
   var converted = convertSelected();
   for(var field in converted) {
     var value = converted[field];
@@ -296,7 +297,8 @@ function recomputeTotals() {
     elem.innerHTML = value;
   }
 
-  var totals = computeTotals(converted);
+  // totals is a global var
+  totals = computeTotals(converted);
   for(var field in totals) {
     var value = totals[field];
     var elem  = document.getElementById("total-" + field);
@@ -314,5 +316,52 @@ function showPrices () {
     let price = prices[category];
     let elem  = document.getElementById("price-" + category);
     elem.innerHTML = price.toFixed(2);
+  }
+}
+
+/*
+ * Respond to calculator buttons
+ */
+function calculatorPress(button) {
+  var receivedElem = document.getElementById("received");
+  var received     = receivedElem.value;
+
+  // Avoid unnecessary initial 0 ("01")
+  if(received == "0") {
+    received = "";
+  }
+
+  switch(button) {
+    // Most buttons modify the value
+    case "000": received += "0"; break;
+    case "001": received += "1"; break;
+    case "002": received += "2"; break;
+    case "003": received += "3"; break;
+    case "004": received += "4"; break;
+    case "005": received += "5"; break;
+    case "006": received += "6"; break;
+    case "007": received += "7"; break;
+    case "008": received += "8"; break;
+    case "009": received += "9"; break;
+    case "dot": received += "."; break;
+
+    // The other buttons reset the value
+    case "cross": received =   "0"; break;
+    case "010":   received =  "10"; break;
+    case "020":   received =  "20"; break;
+    case "050":   received =  "50"; break;
+    case "100":   received = "100"; break;
+  }
+
+  receivedElem.value = received;
+
+  // Update change
+  var change     = parseFloat(received) - totals["overall"];
+  var changeElem = document.getElementById("change");
+
+  if(change >= 0) {
+    changeElem.innerHTML = change.toFixed(2);
+  } else {
+    changeElem.innerHTML = "<span style=\"color: maroon;'\">" + change.toFixed(2) + "</span>";
   }
 }
