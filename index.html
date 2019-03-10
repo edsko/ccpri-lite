@@ -12,13 +12,17 @@
 
 <table class="header">
 <tr>
-  <td rowspan="2"><img src="img/nblogo.jpg"></td>
+  <td rowspan="3"><img src="img/nblogo.jpg"></td>
 </tr>
-<tr>
-  <td class="title">Caravan &amp; Camping Park Registration Interface &mdash; Lite</td>
-</tr>
+<tr><td class="title">Caravan &amp; Camping Park Registration Interface &mdash; Lite</td></tr>
+<tr><td><div id="headerButtons"/></td></tr>
 </table>
 
+<!--
+  MAIN SCREEN
+-->
+
+<div id="screen-main" style="display: none;">
 
 <!-- Main form -->
 
@@ -48,7 +52,7 @@
     <img id="type-4-tent"          onClick="select('type', '4-tent');"          src="img/buttons/unselected/type/4-tent.jpg"/>
     <img id="type-5-caravan"       onClick="select('type', '5-caravan');"       src="img/buttons/unselected/type/5-caravan.jpg"/>
     <img id="type-6-motorhome"     onClick="select('type', '6-motorhome');"     src="img/buttons/unselected/type/6-motorhome.jpg"/>
-    <img id="type-7-coach"         onClick="select('type', '7-coach');"         src="img/buttons/unselected/type/7-coach.jpg"/>
+<!--    <img id="type-7-coach"         onClick="select('type', '7-coach');"         src="img/buttons/unselected/type/7-coach.jpg"/> -->
   </td>
 </tr>
 
@@ -138,6 +142,16 @@
 </tr>
 
 </table>
+
+</div>
+
+<!--
+  RECEIPT SCREEN
+-->
+
+<div id="screen-receipt" style="display: none;">
+
+</div>
 
 </body>
 

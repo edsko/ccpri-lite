@@ -16,13 +16,22 @@ var types = {
   , "adults"      : "int"
   , "children"    : "int"
   , "electricity" : "bool"
-  }
+  };
 
 // Standard field values (for fields supporting freeform input)
 var standardValues = {
     "nationality" : ["01-IE", "02-NI", "03-UK", "04-D", "05-NL", "06-F", "07-SP", "08-I", "09-B", "10-A"]
   , "nights"      : ["000" , "001" , "002" , "003" , "004" , "005" , "006" , "007" , "008" , "009"]
-  }
+  };
+
+// All available screens
+var allScreens = ["main", "receipt"];
+
+// Header buttons required per screen
+var headerButtons = {
+    "main"    : ["Ok"]
+  , "receipt" : ["Cancel", "Print"]
+  };
 
 /*
  * Global variables
@@ -42,6 +51,42 @@ var selected = {
 var selectedDate = null;
 
 /*
+ * Get UI elements
+ */
+
+// Get UI element corresponding to a (standard) value of a field
+function getFieldButton(field, value) {
+  return document.getElementById(field + "-" + value);
+}
+
+// Get UI element corresponding to the freeform value of a field
+function getFreeformButton(field) {
+  return document.getElementById(field + "-freeform-select");
+}
+
+// Get screen
+function getScreen(name) {
+  return document.getElementById("screen" + "-" + name);
+}
+
+/*
+ * Switch screens
+ */
+
+function selectScreen(newScreen) {
+  for(const oldScreen of allScreens) {
+    getScreen(oldScreen).style.display = "none";
+  }
+
+  getScreen(newScreen).style.display = "block";
+  var headerButtonsDiv = document.getElementById("headerButtons");
+  headerButtonsDiv.innerHTML = "";
+  for(const button of headerButtons[newScreen]) {
+    headerButtonsDiv.innerHTML += "<button type=\"button\" onClick=\"clickedHeaderButton('" + newScreen + "', '" + button + "');\">" + button + "<\/button>";
+  }
+}
+
+/*
  * Initialize
  */
 function init() {
@@ -57,6 +102,7 @@ function init() {
 
   markSelectedFields();
   updateDateField();
+  selectScreen("main");
 }
 
 /*
@@ -93,21 +139,6 @@ function updateDateField() {
   elem.innerHTML = day + "-" + month + "-" + year;
 }
 
-/*
- * Get UI element corresponding to a value of a field
- *
- * This only applies to standard values.
- */
-function getFieldButton(field, value) {
-  return document.getElementById(field + "-" + value);
-}
-
-/*
- * Get UI element corresponding to the freeform value of a field
- */
-function getFreeformButton(field) {
-  return document.getElementById(field + "-freeform-select");
-}
 
 /*
  * Get image corresponding to the given value
@@ -177,4 +208,19 @@ function freeformFocus(field) {
 function moveDate(delta) {
   selectedDate.setDate(selectedDate.getDate() + delta);
   updateDateField();
+}
+
+/*
+ * Respond to a header button
+ */
+function clickedHeaderButton(curScreen, button) {
+  switch(curScreen) {
+    case "main":
+      switch(button) {
+        case "Ok":
+          selectScreen("receipt");
+          break;
+      }
+      break;
+  }
 }
