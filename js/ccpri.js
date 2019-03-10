@@ -36,7 +36,7 @@ var allScreens = ["main", "receipt", "leaving"];
 
 // Header buttons required per screen
 var headerButtons = {
-    "main"    : ["Ok", "Leaving", "Print Test"]
+    "main"    : ["Ok", "Leaving"]
   , "receipt" : ["Cancel", "Print"]
   , "leaving" : ["Ok"]
   };
@@ -424,6 +424,7 @@ function calculatorPress(button) {
 function confirmBooking() {
   var tx = db.transaction(["bookings"], "readwrite");
   tx.oncomplete = function(event) {
+    printReceipt();
     resetMainScreen();
     selectScreen('main');
   }
