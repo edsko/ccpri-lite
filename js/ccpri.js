@@ -5,34 +5,40 @@
 var version = "0.1";
 
 /*
- * Setup
+ * Constants
  */
 
-/* Types of the fields on the main screen */
+// Types of the fields on the main screen
 var types = {
-    "type":        "type"
-  , "nationality": "nationality"
-  , "nights":      "int"
-  , "adults":      "int"
-  , "children":    "int"
-  , "electricity": "bool"
+    "type"        : "type"
+  , "nationality" : "nationality"
+  , "nights"      : "int"
+  , "adults"      : "int"
+  , "children"    : "int"
+  , "electricity" : "bool"
+  }
+
+// Standard field values (for fields supporting freeform input)
+var standardValues = {
+    "nationality" : ["01-IE", "02-NI", "03-UK", "04-D", "05-NL", "06-F", "07-SP", "08-I", "09-B", "10-A"]
+  , "nights"      : ["000" , "001" , "002" , "003" , "004" , "005" , "006" , "007" , "008" , "009"]
   }
 
 /*
  * Global variables
  */
 
-/* Currently selected values */
+// Currently selected values
 var selected = {
-    "type":        "5-caravan"
-  , "nationality": "01-IE"
-  , "nights":      "000"
-  , "adults":      "000"
-  , "children":    "000"
-  , "electricity": "false"
+    "type"        : "5-caravan"
+  , "nationality" : "01-IE"
+  , "nights"      : "000"
+  , "adults"      : "000"
+  , "children"    : "000"
+  , "electricity" : "false"
   }
 
-/* Selected date (set in `init`) */
+// Selected date (set in `init`)
 var selectedDate = null;
 
 /*
@@ -54,11 +60,25 @@ function init() {
 }
 
 /*
+ * Check if `value` is a standard value for the given field
+ *
+ * `false` if the user entered freeform text
+ */
+function isStandardValue(field, value) {
+  if(standardValues[field] == null) {
+    // This field does not support freeform input
+    return true;
+  } else {
+    return standardValues[field].includes(value);
+  }
+}
+
+/*
  * Mark selected elements based on the current value of `selected`
  */
 function markSelectedFields() {
   for (var field in selected) {
-    setFieldState(field, "selected");
+    setFieldState(field, selected[field], "selected");
   }
 }
 
@@ -74,24 +94,79 @@ function updateDateField() {
 }
 
 /*
- * Change button state for the specified field
+ * Get UI element corresponding to a value of a field
+ *
+ * This only applies to standard values.
+ */
+function getFieldButton(field, value) {
+  return document.getElementById(field + "-" + value);
+}
+
+/*
+ * Get UI element corresponding to the freeform value of a field
+ */
+function getFreeformButton(field) {
+  return document.getElementById(field + "-freeform-select");
+}
+
+/*
+ * Get image corresponding to the given value
  *
  * `state` should be "selected" or "unselected"
+ * This only applies to standard values.
  */
-function setFieldState(field, state) {
- var value = selected[field];
- var type  = types[field];
- var elem  = document.getElementById(field + "-" + value);
- elem.src = "img/buttons/" + state + "/" + type + "/" + value + ".jpg";
+function getImageForValue(field, value, state) {
+  var type = types[field];
+  return "img/buttons/" + state + "/" + type + "/" + value + ".jpg";
+}
+
+/*
+ * Change button state for the specified field
+ *
+ * `oldValue` may be null
+ */
+function setFieldState(field, value, state) {
+  if(isStandardValue(field, value)) {
+    var elem = getFieldButton(field, value);
+    elem.src = getImageForValue(field, value, state);
+  } else {
+    var elem = getFreeformButton(field);
+    elem.src = "img/buttons/" + state + "/arrows/right.jpg";
+  }
+}
+
+/*
+ * Update UI in response to a value change
+ */
+function updateFieldState(field, oldValue, newValue) {
+  setFieldState(field, oldValue, "unselected");
+  setFieldState(field, newValue, "selected");
 }
 
 /*
  * Update `selected` in response to user selection
  */
-function select(field, value) {
-  setFieldState(field, "unselected");
-  selected[field] = value;
-  setFieldState(field, "selected");
+function select(field, newValue) {
+  updateFieldState(field, selected[field], newValue);
+  selected[field] = newValue;
+}
+
+/*
+ * Select freeform value of a field
+ */
+function freeformSelect(field) {
+  var newValue = document.getElementById(field + "-freeform").value;
+  updateFieldState(field, selected[field], newValue);
+  selected[field] = newValue;
+}
+
+/*
+ * Focus the freeform field and use it's value
+ */
+function freeformFocus(field) {
+  var elem = document.getElementById(field + "-freeform")
+  elem.focus();
+  freeformSelect(field);
 }
 
 /*
