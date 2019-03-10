@@ -102,7 +102,7 @@ function init() {
 
   markSelectedFields();
   updateDateField();
-  selectScreen("main");
+  selectScreen("receipt");
 }
 
 /*
