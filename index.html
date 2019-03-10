@@ -14,7 +14,7 @@
 <tr>
   <td rowspan="3"><img src="img/nblogo.jpg"></td>
 </tr>
-<tr><td class="title">Caravan &amp; Camping Park Registration Interface &mdash; Lite</td></tr>
+<tr><td><h1>Caravan &amp; Camping Park Registration Interface &mdash; Lite</h1><p id="versionTag">Version <span id="version"/></p></td></tr>
 <tr><td><div id="headerButtons"/></td></tr>
 </table>
 
@@ -251,6 +251,22 @@
 </td>
 </tr>
 </table>
+
+</div>
+
+<!--
+  LEAVING SCREEN
+-->
+
+<div id="screen-leaving" style="display: none;">
+
+<h1>There are <span id="numLeaving">numLeaving</span> guests leaving on <span id="leavingDate">leavingDate</span></h1>
+
+<h2>Guests with known registration (<span id="numRegKnown">numRegKnown</span>)</h2>
+<div id="leavingRegKnown"/>
+
+<h2>Guests with unknown registration (<span id="numRegUnknown">numRegUnknown</span>)</h2>
+<div id="leavingRegUnknown"/>
 
 </div>
 

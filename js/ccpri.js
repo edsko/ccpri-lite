@@ -2,7 +2,7 @@
  * CCPRI Lite
  */
 
-var version = "0.1";
+var version = "March 10, 2019";
 
 /*
  * Constants
@@ -32,16 +32,16 @@ var standardValues = {
   };
 
 // All available screens
-var allScreens = ["main", "receipt"];
+var allScreens = ["main", "receipt", "leaving"];
 
 // Header buttons required per screen
 var headerButtons = {
-    "main"    : ["Ok"]
+    "main"    : ["Ok", "Leaving"]
   , "receipt" : ["Cancel", "Print"]
   };
 
 // Debugging only: show all screens at once
-var showAllScreens = false;
+var showAllScreens = true;
 
 /*
  * Global variables
@@ -112,7 +112,11 @@ function advanceDate(date, delta) {
 
 function selectScreen(newScreen) {
   for(const oldScreen of allScreens) {
-    getScreen(oldScreen).style.display = "none";
+    if(!showAllScreens) {
+      getScreen(oldScreen).style.display = "none";
+    } else {
+      getScreen(oldScreen).style.display = "block";
+    }
   }
 
   getScreen(newScreen).style.display = "block";
@@ -127,19 +131,9 @@ function selectScreen(newScreen) {
  * Initialize
  */
 function init() {
-  console.log("CCPRI Lite " + version);
+  document.getElementById("version").innerHTML = version;
 
-  if(typeof(Storage) !== undefined) {
-    console.log("Web Storage supported");
-  } else {
-    console.log("ERROR: Web Storage unsupported");
-  }
-
-  if(!window.indexedDB) {
-    alert("ERROR: No IndexedDB support");
-  } else {
-    openDB();
-  }
+  openDB();
 
   selectedDate = new Date();
 
@@ -148,13 +142,7 @@ function init() {
   showPrices();
   recomputeTotals();
 
-  if(!showAllScreens) {
-    selectScreen("main");
-  } else {
-    for(const screenName of allScreens) {
-      getScreen(screenName).style.display = "block";
-    }
-  }
+  selectScreen("main");
 }
 
 /*
@@ -270,6 +258,7 @@ function clickedHeaderButton(curScreen, button) {
     case "main":
       switch(button) {
         case "Ok": selectScreen("receipt"); break;
+        case "Leaving": showLeaving(); break;
       }
       break;
     case "receipt":
@@ -431,6 +420,11 @@ function confirmBooking() {
  * See https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
  */
 function openDB() {
+  if(!window.indexedDB) {
+    alert("ERROR: No IndexedDB support");
+    return;
+  }
+
   var version = 1;
   var request = window.indexedDB.open("ApplicationState", version);
   request.onerror = function(event) {
@@ -445,4 +439,20 @@ function openDB() {
     var db = event.target.result;
     db.createObjectStore("bookings", { autoIncrement: true });
   }
+}
+
+/*
+ * Update and then switch to the leaving screen
+ */
+function showLeaving() {
+  console.log("Showing leaving..");
+
+  var elemNumLeaving        = document.getElementById("numLeaving");
+  var elemLeavingDate       = document.getElementById("leavingDate");
+  var elemNumKnownReg       = document.getElementById("numKnownReg");
+  var elemNumUnknownReg     = document.getElementById("numUnknownReg");
+  var elemLeavingKnownReg   = document.getElementById("leavingKnownReg");
+  var elemLeavingUnknownReg = document.getElementById("leavingUnknownReg");
+
+  elemLeavingDate.innerHTML = formatDate(selectedDate);
 }

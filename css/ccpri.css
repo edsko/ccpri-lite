@@ -6,9 +6,16 @@ table.header td {
   vertical-align: top;
 }
 
-td.title {
+h1 {
   color: darkblue;
   font-weight: bold;
+  margin: 0px;
+}
+
+p#versionTag {
+  font-size: 12px;
+  font-style: italic;
+  margin: 0px;
 }
 
 td.spacer {
