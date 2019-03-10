@@ -93,3 +93,13 @@ function select(field, value) {
   selected[field] = value;
   setFieldState(field, "selected");
 }
+
+/*
+ * Change the date
+ *
+ * `delta` should be +1 (next day) or -1 (previous day)
+ */
+function moveDate(delta) {
+  selectedDate.setDate(selectedDate.getDate() + delta);
+  updateDateField();
+}
