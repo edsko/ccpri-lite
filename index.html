@@ -151,18 +151,66 @@
 
 <div id="screen-receipt" style="display: none;">
 
-<table cellpadding="5">
+<table class="receiptScreen">
 <tr>
 <td style="border-right: solid darkred 2px;">
 
   <!-- The actual receipt -->
-  receipt
+  <table class="receipt" border="0">
+  <tr>
+    <td colspan="5">
+      Arrival:   <span id="arrival"   class="receiptValue">arrival</span>
+      Departure: <span id="departure" class="receiptValue">departure</span>
+    </td>
+  </tr>
+  <tr class="rowSpacer"/>
+  <tr>
+    <td>Adults</td>
+    <td><span id="num-adults" class="receiptValue">n</span></td>
+    <td>&times;</td>
+    <td>&euro; <span id="price-adults">price</td>
+    <td>= &euro;</td>
+    <td class="numeric"><span id="per-day-adults" class="receiptValue">per-day</span></td>
+  </tr>
+  <tr>
+    <td>Children</td>
+    <td><span id="num-children" class="receiptValue">n</span></td>
+    <td>&times;</td>
+    <td>&euro; <span id="price-children">price</td>
+    <td>= &euro;</td>
+    <td class="numeric"><span id="per-day-children" class="receiptValue">per-day</span></td>
+  </tr>
+  <tr>
+    <td colspan="4">Electricity</td>
+    <td>= &euro;</td>
+    <td class="numeric"><span id="per-day-electricity" class="receiptValue">per-day</span></td>
+  </tr>
+  <tr class="rowSpacer"/>
+  <tr>
+    <td colspan="4">Price per night</td>
+    <td>= &euro;</td>
+    <td class="numeric"><span id="price-per-night" class="receiptValue">per-night</span></td>
+  </tr>
+  <tr>
+    <td colspan="4">Number of nights</td>
+    <td>=</td>
+    <td class="numeric"><span id="num-nights" class="receiptValue">num-nights</span></td>
+    <td>&times;</td>
+  </tr>
+  <tr class="rowSpacer"/>
+  <tr class="total">
+    <td colspan="4">Total price</td>
+    <td>= &euro;</td>
+    <td class="numeric"><span id="price-total" class="receiptValue">total-price</span></td>
+  </tr>
+
+  </table>
 
 </td>
 <td>
 
   <!-- Calculator -->
-  <table cellpadding="0">
+  <table class="calculator">
   <tr>
     <td><img src="img/buttons/unselected/int/001.jpg"></td>
     <td><img src="img/buttons/unselected/int/002.jpg"></td>
@@ -191,9 +239,9 @@
     <td class="spacer"/>
     <td><img src="img/buttons/unselected/int/100.jpg"></td>
   </tr>
-  <tr><td>&nbsp;</td><tr/>
+  <tr class="rowSpacer"/>
   <tr><td colspan="5"><input></td></tr>
-  <tr><td>&nbsp;</td><tr/>
+  <tr class="rowSpacer"/>
   <tr><td colspan="5">Change: &euro;<span id="change"/></td></tr>
   </table>
 

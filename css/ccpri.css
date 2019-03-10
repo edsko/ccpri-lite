@@ -26,4 +26,43 @@ div#headerButtons button {
   padding-bottom: 5px;
   padding-left: 10px;
   padding-right: 10px;
+  margin: 5px;
+}
+
+.receiptValue {
+  font-weight: bold;
+}
+
+tr.rowSpacer {
+  height: 15px;
+}
+
+table.receiptScreen td {
+  vertical-align: top;
+  padding: 5px;
+}
+
+table.receipt {
+  border-collapse: collapse;
+}
+
+table.receipt td {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 1px;
+  padding-right: 1px;
+  font-size: 20px;
+}
+
+table.calculator td {
+  padding: 0px;
+}
+
+td.numeric {
+  text-align: right;
+}
+
+tr.total td {
+  font-size: 30px;
+  border-top: solid black 2px;
 }
