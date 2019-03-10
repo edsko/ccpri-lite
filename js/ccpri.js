@@ -41,7 +41,7 @@ var headerButtons = {
   };
 
 // Debugging only: show all screens at once
-var showAllScreens = true;
+var showAllScreens = false;
 
 /*
  * Global variables
@@ -83,6 +83,27 @@ function getScreen(name) {
 }
 
 /*
+ * Util
+ */
+
+function formatCurrency(value) {
+  return value.toFixed(2);
+}
+
+function formatDate(date) {
+  var day   = date.getDate()
+  var month = date.getMonth() + 1;
+  var year  = date.getFullYear();
+  return day + "-" + month + "-" + year;
+}
+
+function advanceDate(date, delta) {
+  var newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + delta);
+  return newDate;
+}
+
+/*
  * Switch screens
  */
 
@@ -119,7 +140,7 @@ function init() {
   recomputeTotals();
 
   if(!showAllScreens) {
-    selectScreen("receipt");
+    selectScreen("main");
   } else {
     for(const screenName of allScreens) {
       getScreen(screenName).style.display = "block";
@@ -154,11 +175,8 @@ function markSelectedFields() {
  * Update the UI to reflect the value of `selectedDate`
  */
 function updateDateField() {
-  var elem  = document.getElementById("selectedDate");
-  var day   = selectedDate.getDate()
-  var month = selectedDate.getMonth() + 1;
-  var year  = selectedDate.getFullYear();
-  elem.innerHTML = day + "-" + month + "-" + year;
+  var elem = document.getElementById("selectedDate");
+  elem.innerHTML = formatDate(selectedDate);
 }
 
 
@@ -230,8 +248,9 @@ function freeformFocus(field) {
  * `delta` should be +1 (next day) or -1 (previous day)
  */
 function moveDate(delta) {
-  selectedDate.setDate(selectedDate.getDate() + delta);
+  selectedDate = advanceDate(selectedDate, delta);
   updateDateField();
+  recomputeTotals();
 }
 
 /*
@@ -302,8 +321,11 @@ function recomputeTotals() {
   for(var field in totals) {
     var value = totals[field];
     var elem  = document.getElementById("total-" + field);
-    elem.innerHTML = value.toFixed(2);
+    elem.innerHTML = formatCurrency(value);
   }
+
+  document.getElementById("arrival").innerHTML   = formatDate(selectedDate);
+  document.getElementById("departure").innerHTML = formatDate(advanceDate(selectedDate, converted["nights"]));
 }
 
 /*
@@ -315,7 +337,7 @@ function showPrices () {
   for(var category in prices) {
     let price = prices[category];
     let elem  = document.getElementById("price-" + category);
-    elem.innerHTML = price.toFixed(2);
+    elem.innerHTML = formatCurrency(price);
   }
 }
 
@@ -360,8 +382,8 @@ function calculatorPress(button) {
   var changeElem = document.getElementById("change");
 
   if(change >= 0) {
-    changeElem.innerHTML = change.toFixed(2);
+    changeElem.innerHTML = formatCurrency(change);
   } else {
-    changeElem.innerHTML = "<span style=\"color: maroon;'\">" + change.toFixed(2) + "</span>";
+    changeElem.innerHTML = "<span style=\"color: maroon;'\">" + formatCurrency(change) + "</span>";
   }
 }
