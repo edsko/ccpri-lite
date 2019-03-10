@@ -36,7 +36,7 @@ var allScreens = ["main", "receipt", "leaving"];
 
 // Header buttons required per screen
 var headerButtons = {
-    "main"    : ["Ok", "Leaving"]
+    "main"    : ["Ok", "Leaving", "Print Test"]
   , "receipt" : ["Cancel", "Print"]
   , "leaving" : ["Ok"]
   };
@@ -275,6 +275,7 @@ function clickedHeaderButton(curScreen, button) {
       switch(button) {
         case "Ok": selectScreen("receipt"); break;
         case "Leaving": showLeaving(); break;
+        case "Print Test": printReceipt(); break;
       }
       break;
     case "receipt":
@@ -519,4 +520,13 @@ function formatBooking(entry) {
        + (selected["electricity"] > 0 ? "+E" : "") + " "
        + "(" + selected["nights"] + ")"
        ;
+}
+
+/*
+ * Print receipt
+ */
+function printReceipt() {
+  // Make global variable available for the receipt to refer to
+  receipt = "This is the receipt";
+  window.open("receipt.html");
 }
