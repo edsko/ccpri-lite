@@ -5,25 +5,25 @@ body {
 td {
   padding: 0px;
   vertical-align: top;
-  font-size: 6pt;
+  font-size: 7pt;
 }
 
 td.header {
   font-weight: bold;
-  font-size: 10pt;
+  font-size: 12pt;
   text-align: center;
 }
 
 td.address {
   text-align: center;
-  font-size: 5pt;
+  font-size: 6pt;
 }
 
 td.importantValue {
-  font-size: 8pt;
+  font-size: 10pt;
   font-weight: bold;
 }
 
 td.smallPrint {
-  font-size: 5pt;
+  font-size: 6pt;
 }
