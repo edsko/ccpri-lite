@@ -32,6 +32,9 @@ var selected = {
   , "electricity": "false"
   }
 
+/* Selected date (set in `init`) */
+var selectedDate = null;
+
 /*
  * Initialize
  */
@@ -44,36 +47,49 @@ function init() {
     console.log("ERROR: Web Storage unsupported");
   }
 
-  markSelected();
+  selectedDate = new Date();
+
+  markSelectedFields();
+  updateDateField();
 }
 
 /*
  * Mark selected elements based on the current value of `selected`
  */
-function markSelected() {
+function markSelectedFields() {
   for (var field in selected) {
-    let value = selected[field];
-    let type  = types[field];
-    let elem  = document.getElementById(field + "-" + value);
-    elem.src = "img/buttons/selected/" + type + "/" + value + ".jpg";
+    setFieldState(field, "selected");
   }
 }
 
 /*
- * Deselect old value
+ * Update the UI to reflect the value of `selectedDate`
  */
-function unmarkSelectedField(field) {
-  var value = selected[field];
-  var type  = types[field];
-  var elem  = document.getElementById(field + "-" + value);
-  elem.src = "img/buttons/unselected/" + type + "/" + value + ".jpg";
+function updateDateField() {
+  var elem  = document.getElementById("selectedDate");
+  var day   = selectedDate.getDate()
+  var month = selectedDate.getMonth() + 1;
+  var year  = selectedDate.getFullYear();
+  elem.innerHTML = day + "-" + month + "-" + year;
+}
+
+/*
+ * Change button state for the specified field
+ *
+ * `state` should be "selected" or "unselected"
+ */
+function setFieldState(field, state) {
+ var value = selected[field];
+ var type  = types[field];
+ var elem  = document.getElementById(field + "-" + value);
+ elem.src = "img/buttons/" + state + "/" + type + "/" + value + ".jpg";
 }
 
 /*
  * Update `selected` in response to user selection
  */
 function select(field, value) {
-  unmarkSelectedField(field);
+  setFieldState(field, "unselected");
   selected[field] = value;
-  markSelected();
+  setFieldState(field, "selected");
 }
