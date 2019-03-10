@@ -8,6 +8,13 @@ var version = "0.1";
  * Constants
  */
 
+// Prices
+var prices = {
+    "adult": 10.0
+  , "child": 5.0
+  , "electricity": 5
+  }
+
 // Types of the fields on the main screen
 var types = {
     "type"        : "type"
@@ -32,6 +39,9 @@ var headerButtons = {
     "main"    : ["Ok"]
   , "receipt" : ["Cancel", "Print"]
   };
+
+// Debugging only: show all screens at once
+var showAllScreens = true;
 
 /*
  * Global variables
@@ -102,7 +112,16 @@ function init() {
 
   markSelectedFields();
   updateDateField();
-  selectScreen("receipt");
+  showPrices();
+  recomputeTotals();
+
+  if(!showAllScreens) {
+    selectScreen("receipt");
+  } else {
+    for(const screenName of allScreens) {
+      getScreen(screenName).style.display = "block";
+    }
+  }
 }
 
 /*
@@ -180,6 +199,7 @@ function updateFieldState(field, oldValue, newValue) {
 function select(field, newValue) {
   updateFieldState(field, selected[field], newValue);
   selected[field] = newValue;
+  recomputeTotals();
 }
 
 /*
@@ -189,6 +209,7 @@ function freeformSelect(field) {
   var newValue = document.getElementById(field + "-freeform").value;
   updateFieldState(field, selected[field], newValue);
   selected[field] = newValue;
+  recomputeTotals();
 }
 
 /*
@@ -222,5 +243,76 @@ function clickedHeaderButton(curScreen, button) {
           break;
       }
       break;
+    case "receipt":
+      switch(button) {
+        case "Cancel":
+          selectScreen("main");
+      }
+      break;
+  }
+}
+
+/*
+ * Convert selected values to integers
+ */
+function convertSelected() {
+  return {
+      "nights"      : parseInt(selected["nights"])
+    , "adults"      : parseInt(selected["adults"])
+    , "children"    : parseInt(selected["children"])
+    , "electricity" : selected["electricity"] == 'true' ? 1 : 0
+    };
+}
+
+/*
+ * Compute prices, given converted selected values (see `convertSelected`)
+ */
+function computeTotals(converted) {
+   var perNightAdult       = converted["adults"]      * prices["adult"]
+   var perNightChild       = converted["children"]    * prices["child"]
+   var perNightElectricity = converted["electricity"] * prices["electricity"]
+   var perNight            = perNightAdult + perNightChild + perNightElectricity;
+   var total               = converted["nights"]      * perNight;
+
+   return {
+      "per-night-adult"       : perNightAdult
+    , "per-night-child"       : perNightChild
+    , "per-night-electricity" : perNightElectricity
+    , "per-night"             : perNight
+    , "overall"               : total
+    };
+}
+
+/*
+ * Recompute totals and update the UI
+ */
+function recomputeTotals() {
+  console.log("Recomputing..");
+
+  var converted = convertSelected();
+  for(var field in converted) {
+    var value = converted[field];
+    var elem  = document.getElementById("selected-" + field);
+    elem.innerHTML = value;
+  }
+
+  var totals = computeTotals(converted);
+  for(var field in totals) {
+    var value = totals[field];
+    var elem  = document.getElementById("total-" + field);
+    elem.innerHTML = value.toFixed(2);
+  }
+}
+
+/*
+ * Update UI with prices
+ *
+ * Prices cannot be fixed in the UI itself, so doing this once suffices
+ */
+function showPrices () {
+  for(var category in prices) {
+    let price = prices[category];
+    let elem  = document.getElementById("price-" + category);
+    elem.innerHTML = price.toFixed(2);
   }
 }
