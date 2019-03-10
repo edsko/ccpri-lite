@@ -60,8 +60,11 @@ var selected = {
 // Selected date (set in `init`)
 var selectedDate = null;
 
-// Current totals (set in 'recomputeTotals')
-var totals = null;
+// Current booking in progress (set in 'recomputeTotals')
+var booking = null;
+
+// IndexedDB (set in 'init')
+var db = null;
 
 /*
  * Get UI elements
@@ -130,6 +133,12 @@ function init() {
     console.log("Web Storage supported");
   } else {
     console.log("ERROR: Web Storage unsupported");
+  }
+
+  if(!window.indexedDB) {
+    alert("ERROR: No IndexedDB support");
+  } else {
+    openDB();
   }
 
   selectedDate = new Date();
@@ -260,15 +269,13 @@ function clickedHeaderButton(curScreen, button) {
   switch(curScreen) {
     case "main":
       switch(button) {
-        case "Ok":
-          selectScreen("receipt");
-          break;
+        case "Ok": selectScreen("receipt"); break;
       }
       break;
     case "receipt":
       switch(button) {
-        case "Cancel":
-          selectScreen("main");
+        case "Cancel": selectScreen("main"); break;
+        case "Print": confirmBooking(); break;
       }
       break;
   }
@@ -316,16 +323,26 @@ function recomputeTotals() {
     elem.innerHTML = value;
   }
 
-  // totals is a global var
-  totals = computeTotals(converted);
+  var totals = computeTotals(converted);
   for(var field in totals) {
     var value = totals[field];
     var elem  = document.getElementById("total-" + field);
     elem.innerHTML = formatCurrency(value);
   }
 
-  document.getElementById("arrival").innerHTML   = formatDate(selectedDate);
-  document.getElementById("departure").innerHTML = formatDate(advanceDate(selectedDate, converted["nights"]));
+  // update the global booking
+  booking = {
+      "id"          : document.getElementById("identification").value
+    , "type"        : selected["type"]
+    , "nationality" : selected["nationality"]
+    , "selected"    : converted
+    , "arrival"     : selectedDate
+    , "departure"   : advanceDate(selectedDate, converted["nights"])
+    , "totals"      : totals
+    };
+
+  document.getElementById("arrival").innerHTML   = formatDate(booking["arrival"]);
+  document.getElementById("departure").innerHTML = formatDate(booking["departure"]);
 }
 
 /*
@@ -385,5 +402,47 @@ function calculatorPress(button) {
     changeElem.innerHTML = formatCurrency(change);
   } else {
     changeElem.innerHTML = "<span style=\"color: maroon;'\">" + formatCurrency(change) + "</span>";
+  }
+}
+
+/*
+ * Confirm a booking
+ *
+ * Add it to the application state, print receipt, back to home screen
+ */
+function confirmBooking() {
+  console.log("confirming", booking);
+
+  var tx = db.transaction(["bookings"], "readwrite");
+  tx.oncomplete = function(event) {
+    console.log("Booking written to the DB");
+    selectScreen('main');
+  }
+  tx.onerror = function(event) {
+    alert("Failed to write booking to the DB");
+  }
+  var objectStore = tx.objectStore("bookings");
+  objectStore.add(booking);
+}
+
+/*
+ * Open the indexedDB
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+ */
+function openDB() {
+  var version = 1;
+  var request = window.indexedDB.open("ApplicationState", version);
+  request.onerror = function(event) {
+    alert("Unable to open the DB. Perhaps permission problem?");
+  };
+  request.onsuccess = function(event) {
+    console.log("DB initialized");
+    db = event.target.result;
+  };
+  request.onupgradeneeded = function(event) {
+    console.log("Upgrading database");
+    var db = event.target.result;
+    db.createObjectStore("bookings", { autoIncrement: true });
   }
 }
