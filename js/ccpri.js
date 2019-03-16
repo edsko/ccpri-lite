@@ -550,13 +550,28 @@ function printReceipt() {
 var exportURL = null;
 
 function exportBookings() {
-  var data = new Blob("hello there", {type: 'text/plain'});
+  var fileName = "bookings-" + formatDate(new Date()) + ".json";
+  var bookings = {};
 
   if (exportURL != null) {
     // Avoid memory leak, as per the docs
     window.URL.revokeObjectURL(exportURL);
+    exportURL = null;
+    document.getElementById("downloadLink").removeAttribute("href");
+    document.getElementById("downloadLink").removeAttribute("download");
   }
 
-  exportURL = window.URL.createObjectURL(data);
-  console.log(exportURL);
+  var objStore = db.transaction("bookings").objectStore("bookings");
+  objStore.openCursor().onsuccess = function(event) {
+    var cursor = event.target.result;
+    if(cursor) {
+      bookings[cursor.key] = cursor.value;
+      cursor.continue();
+    } else {
+      let data = new Blob([JSON.stringify(bookings)], {type: 'application/json'});
+      exportURL = window.URL.createObjectURL(data);
+      document.getElementById("downloadLink").href     = exportURL;
+      document.getElementById("downloadLink").download = fileName;
+    }
+  }
 }
