@@ -73,3 +73,16 @@ tr.total td {
   font-size: 30px;
   border-top: solid black 2px;
 }
+
+div.adminLinks {
+  margin-top: 3em;
+  padding-top: 0.5em;
+  font-size: 10px;
+  border-top: solid gray 1px;
+  text-align: right;
+  color: gray;
+}
+
+div.adminLinks a {
+  color: gray;
+}

@@ -459,7 +459,8 @@ function openDB() {
     console.log("Upgrading database");
     var db       = event.target.result;
     var objStore = db.createObjectStore("bookings", { autoIncrement: true });
-    objStore.createIndex("departure", "departure", { unique: false });
+    objStore.createIndex("departure" , "departure" , { unique: false });
+    objStore.createIndex("arrival"   , "arrival"   , { unique: false });
   }
 }
 
@@ -540,4 +541,22 @@ function printReceipt() {
     , "nights"      : booking["selected"]["nights"]
     };
   window.open("receipt.html");
+}
+
+/*
+ * Export and import
+ */
+
+var exportURL = null;
+
+function exportBookings() {
+  var data = new Blob("hello there", {type: 'text/plain'});
+
+  if (exportURL != null) {
+    // Avoid memory leak, as per the docs
+    window.URL.revokeObjectURL(exportURL);
+  }
+
+  exportURL = window.URL.createObjectURL(data);
+  console.log(exportURL);
 }
