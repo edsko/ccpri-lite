@@ -575,3 +575,18 @@ function exportBookings() {
     }
   }
 }
+
+function importFile(selectedFiles) {
+ if(selectedFiles.length == 1) {
+   var reader       = new FileReader();
+   var selectedFile = selectedFiles[0];
+   reader.onload = function(e) {
+     importBookings(JSON.parse(e.target.result));
+   }
+   reader.readAsText(selectedFile);
+ }
+}
+
+function importBookings(bookings) {
+  console.log(bookings);
+}
