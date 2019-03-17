@@ -431,8 +431,8 @@ function confirmBooking() {
   tx.onerror = function(event) {
     alert("Failed to write booking to the DB");
   }
-  var objectStore = tx.objectStore("bookings");
-  objectStore.add(booking);
+  var objStore = tx.objectStore("bookings");
+  objStore.add(booking);
 }
 
 /*
@@ -588,5 +588,18 @@ function importFile(selectedFiles) {
 }
 
 function importBookings(bookings) {
-  console.log(bookings);
+  var tx = db.transaction(["bookings"], "readwrite");
+  tx.oncomplete = function(event) {
+    console.log("Import complete");
+    document.getElementById("fileToImport").value = null;
+  }
+  tx.onerror = function(event) {
+    alert("Error during import");
+  }
+
+  var objStore = tx.objectStore("bookings");
+  for(key in bookings) {
+    var val = bookings[key];
+    objStore.put(val, parseInt(key));
+  }
 }
