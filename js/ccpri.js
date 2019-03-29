@@ -2,7 +2,7 @@
  * CCPRI Lite
  */
 
-var version = "March 10, 2019";
+var version = "March 29, 2019";
 
 /*
  * Constants
