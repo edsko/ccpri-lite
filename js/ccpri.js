@@ -32,13 +32,14 @@ var standardValues = {
   };
 
 // All available screens
-var allScreens = ["main", "receipt", "leaving"];
+var allScreens = ["main", "receipt", "leaving", "arrivals"];
 
 // Header buttons required per screen
 var headerButtons = {
-    "main"    : ["Ok", "Leaving"]
-  , "receipt" : ["Cancel", "Print"]
-  , "leaving" : ["Ok"]
+    "main"     : ["Ok", "Arrivals", "Leaving"]
+  , "receipt"  : ["Cancel", "Print"]
+  , "leaving"  : ["Ok"]
+  , "arrivals" : ["Ok"]
   };
 
 // Debugging only: show all screens at once
@@ -274,6 +275,7 @@ function clickedHeaderButton(curScreen, button) {
     case "main":
       switch(button) {
         case "Ok": selectScreen("receipt"); break;
+        case "Arrivals": showArrivals(); break;
         case "Leaving": showLeaving(); break;
         case "Print Test": printReceipt(); break;
       }
@@ -285,6 +287,10 @@ function clickedHeaderButton(curScreen, button) {
       }
       break;
     case "leaving":
+      switch(button) {
+        case "Ok": selectScreen("main"); break;
+      }
+    case "arrivals":
       switch(button) {
         case "Ok": selectScreen("main"); break;
       }
@@ -511,16 +517,72 @@ function showLeaving() {
 }
 
 /*
- * Format a booking for an entry in the leaving list
+ * Update and then switch to the Arrivals screen
+ */
+
+function showArrivals() {
+  console.log("showArrivals");
+
+  var elemNumLeaving         = document.getElementById("numArrivals");
+  var elemArrivalsDate       = document.getElementById("arrivalsDate");
+  var elemNumRegKnown        = document.getElementById("numArrivalsRegKnown");
+  var elemNumRegUnknown      = document.getElementById("numArrivalsRegUnknown");
+  var elemArrivalsRegKnown   = document.getElementById("arrivalsRegKnown");
+  var elemArrivalsRegUnknown = document.getElementById("arrivalsRegUnknown");
+  var elemRevenue            = document.getElementById("arrivalsRevenue");
+
+  var arrivalsDate = formatDate(selectedDate);
+  elemArrivalsDate.innerHTML = arrivalsDate;
+
+  var objStore = db.transaction("bookings").objectStore("bookings");
+  var index    = objStore.index("arrival");
+
+  var numRegKnown        = 0;
+  var numRegUnknown      = 0;
+  var arrivalsRegKnown   = "";
+  var arrivalsRegUnknown = "";
+  var revenue            = 0;
+
+  index.openCursor(IDBKeyRange.only(arrivalsDate)).onsuccess = function(event) {
+    var cursor = event.target.result;
+    if(cursor) {
+      var entry = cursor.value;
+      if(entry["id"] == "") {
+        numRegUnknown++;
+        arrivalsRegUnknown += "<li>" + formatBooking(entry) + "</li>";
+      } else {
+        numRegKnown++;
+        arrivalsRegKnown += "<li>" + formatBooking(entry) + "</li>";
+      }
+      revenue += entry["totals"]["overall"];
+      cursor.continue();
+    } else {
+      // Processed all elements
+      elemNumLeaving.innerHTML         = numRegKnown + numRegUnknown;
+      elemNumRegKnown.innerHTML        = numRegKnown;
+      elemNumRegUnknown.innerHTML      = numRegUnknown;
+      elemArrivalsRegKnown.innerHTML   = arrivalsRegKnown;
+      elemArrivalsRegUnknown.innerHTML = arrivalsRegUnknown;
+      elemRevenue.innerHTML            = revenue;
+      selectScreen('arrivals');
+    }
+  }
+}
+
+/*
+ * Format a booking for an entry in the leaving or arrivals list
  */
 function formatBooking(entry) {
   var selected = entry["selected"];
 
-  return entry["type"].substring(2) + " "
+  return (
+         (entry["id"] == "" ? "" : (entry["id"] + ": "))
+       + entry["type"].substring(2) + " "
        + selected["adults"] + "+"
        + selected["children"]
        + (selected["electricity"] > 0 ? "+E" : "") + " "
        + "(" + selected["nights"] + ")"
+       )
        ;
 }
 
