@@ -12,7 +12,7 @@ var version = "March 29, 2019";
 var prices = {
     "adult": 10.0
   , "child": 5.0
-  , "electricity": 4.0
+  , "electricity": 5.0
   }
 
 // Types of the fields on the main screen
