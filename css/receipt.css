@@ -10,13 +10,13 @@ td {
 
 td.header {
   font-weight: bold;
-  font-size: 16pt;
+  font-size: 8pt;
   text-align: center;
 }
 
 td.address {
   text-align: center;
-  font-size: 16pt;
+  font-size: 20pt;
 }
 
 td.importantValue {
