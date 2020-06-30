@@ -10,7 +10,7 @@ td {
 
 td.header {
   font-weight: bold;
-  font-size: 40pt;
+  font-size: 60pt;
   text-align: center;
 }
 
@@ -25,5 +25,5 @@ td.importantValue {
 }
 
 td.smallPrint {
-  font-size: 40pt;
+  font-size: 60pt;
 }
