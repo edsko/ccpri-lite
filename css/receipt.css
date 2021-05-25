@@ -5,18 +5,18 @@ body {
 td {
   padding: 0px;
   vertical-align: top;
-  font-size: 16pt;
+  font-size: 14pt;
 }
 
 td.header {
   font-weight: bold;
-  font-size: 16pt;
+  font-size: 14pt;
   text-align: center;
 }
 
 td.address {
   text-align: center;
-  font-size: 18pt;
+  font-size: 14pt;
 }
 
 td.importantValue {
