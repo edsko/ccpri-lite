@@ -10,7 +10,7 @@ var version = "March 29, 2019";
 
 // Prices
 var prices = {
-    "adult": 15.0
+    "adult": 17.0
   , "child": 10.00
   , "electricity": 6.0
   }
